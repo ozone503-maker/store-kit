@@ -1,9 +1,11 @@
 {
   "functions": { "api/*.js": { "includeFiles": "store/**" } },
   "rewrites": [
-    { "source": "/product/:id", "destination": "/api/product?id=:id" }
+    { "source": "/product/:id", "destination": "/api/product?id=:id" },
+    { "source": "/buy/:sku", "destination": "/api/buy?sku=:sku" }
   ],
   "headers": [
-    { "source": "/admin.html", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] }
+    { "source": "/admin.html", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/buy/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
   ]
 }

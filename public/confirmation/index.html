@@ -6,8 +6,8 @@
 </head>
 <body>
 <header class="fp-head">
-  <a class="fp-logo" id="logo" href="../">Shop</a>
-  <nav><a href="../" data-shop-home>Shop</a></nav>
+  <a class="fp-logo" id="logo" href="https://www.fruitypuppy.com/" data-site-home>Shop</a>
+  <nav><a href="https://www.fruitypuppy.com/" data-site-home>Home</a> <a href="../" data-shop-home>Shop</a></nav>
 </header>
 <main class="confirm">
   <h1 id="confirm-title">Thank you.</h1>
@@ -46,6 +46,8 @@ if (id && id !== '{CHECKOUT_SESSION_ID}') {
 } else { show('fallback'); }
 const q = brand ? '?brand=' + brand : '';
 document.querySelectorAll('a[data-shop-home]').forEach(a => { a.href = (BASE || '/') + q; });
+const SITE_HOME = { brobots: 'https://brobots.space/', kudoken: 'https://kudoken.space/' }[brand] || (BASE ? '/' : 'https://www.fruitypuppy.com/');
+document.querySelectorAll('a[data-site-home]').forEach(a => { a.href = SITE_HOME; });
 fetch(BASE + '/api/catalog' + q).then(r => r.json()).then(data => {
   const name = data.store && data.store.name;
   if (name) {

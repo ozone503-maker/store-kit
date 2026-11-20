@@ -14,6 +14,9 @@ if (!BRAND) document.body.classList.add('fp');
 
 // Shop and Back to shop links go to the store root (/store on fruitypuppy.com), not the site homepage.
 document.querySelectorAll('a[data-shop-home]').forEach(a => { a.href = (BASE || '/') + brandQ; });
+// Home and the logo go to the brand's own site homepage.
+const SITE_HOME = { brobots: 'https://brobots.space/', kudoken: 'https://kudoken.space/' }[BRAND] || (BASE ? '/' : 'https://www.fruitypuppy.com/');
+document.querySelectorAll('a[data-site-home]').forEach(a => { a.href = SITE_HOME; });
 
 function getCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch { return []; }

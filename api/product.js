@@ -53,8 +53,8 @@ export function GET(request) {
 </head>
 <body class="${brand || /brobots|kudoken/.test(url.hostname) ? '' : 'fp'}">
 <header class="fp-head">
-  <a class="fp-logo" id="home" href="../">${esc(config.name || 'Shop')}</a>
-  <nav><a id="shop" href="../">Shop</a> <a id="cart-link" href="../cart/">Cart</a></nav>
+  <a class="fp-logo" id="home" href="https://www.fruitypuppy.com/" data-site-home>${esc(config.name || 'Shop')}</a>
+  <nav><a href="https://www.fruitypuppy.com/" data-site-home>Home</a> <a id="shop" href="../">Shop</a> <a id="cart-link" href="../cart/">Cart</a></nav>
 </header>
 <main class="product">
   <div class="images">${images || '<p>No photos yet</p>'}</div>
@@ -74,7 +74,6 @@ const BASE = location.pathname.startsWith('/store') ? '/store' : '';
 const brand = new URLSearchParams(location.search).get('brand') || (location.hostname.includes('kudoken') ? 'kudoken' : location.hostname.includes('brobots') ? 'brobots' : '');
 const brandQ = brand ? '?brand=' + brand : '';
 document.getElementById('css').href = BASE + '/store.css';
-document.getElementById('home').href = BASE + '/' + brandQ;
 document.getElementById('shop').href = BASE + '/' + brandQ;
 document.getElementById('cart-link').href = BASE + '/cart' + brandQ;
 document.getElementById('back').href = BASE + '/' + brandQ;

@@ -66,7 +66,15 @@ export async function POST(request, { fetchImpl = fetch } = {}) {
   const check = validateItems(body, catalog, config.cart?.max_qty_per_item || DEFAULT_MAX_QTY);
   if (check.error) return json({ error: check.error }, 400);
 
-  const urls = redirectUrls(config, brand, body.success_url);
+  const result = await createStripeSession({ lines: check.lines, config, brand, hint: body.success_url, stripeKey, fetchImpl });
+  if (result.error) return json({ error: result.error }, result.status);
+  return json({ url: result.url, id: result.id });
+}
+
+// Builds and creates the Stripe Checkout session. Shared by the cart (POST /api/checkout)
+// and the direct-buy link (GET /buy/<sku>) so both charge, ship and label lines identically.
+export async function createStripeSession({ lines, config, brand, hint, stripeKey, fetchImpl = fetch }) {
+  const urls = redirectUrls(config, brand, hint);
   const params = new URLSearchParams();
   params.set('mode', 'payment');
   params.set('success_url', urls.success_url);
@@ -76,7 +84,7 @@ export async function POST(request, { fetchImpl = fetch } = {}) {
   params.set('metadata[brand]', brand || '');
 
   let shippingCents = 0;
-  check.lines.forEach(({ product, variant, quantity }, i) => {
+  lines.forEach(({ product, variant, quantity }, i) => {
     const prefix = `line_items[${i}]`;
     if (variant.stripe_price_id) {
       params.set(`${prefix}[price]`, variant.stripe_price_id);
@@ -85,6 +93,7 @@ export async function POST(request, { fetchImpl = fetch } = {}) {
       params.set(`${prefix}[price_data][product_data][name]`, `${product.title} - ${variant.title}`);
       params.set(`${prefix}[price_data][product_data][metadata][sku]`, variant.sku);
       params.set(`${prefix}[price_data][unit_amount]`, String(variant.price_cents));
+      if (product.checkout_note) params.set(`${prefix}[price_data][product_data][description]`, product.checkout_note);
     }
     params.set(`${prefix}[quantity]`, String(quantity));
     if (product.fixed_shipping_cents) shippingCents = Math.max(shippingCents, product.fixed_shipping_cents);
@@ -106,11 +115,11 @@ export async function POST(request, { fetchImpl = fetch } = {}) {
     });
     session = await res.json();
   } catch {
-    return json({ error: 'Checkout is unavailable right now' }, 502);
+    return { error: 'Checkout is unavailable right now', status: 502 };
   }
   if (!res.ok) {
     console.error('Stripe checkout error', session?.error?.type, session?.error?.code);
-    return json({ error: 'Checkout could not be started' }, 502);
+    return { error: 'Checkout could not be started', status: 502 };
   }
-  return json({ url: session.url, id: session.id });
+  return { url: session.url, id: session.id };
 }
