@@ -89,7 +89,7 @@ export async function createStripeSession({ lines, config, brand, hint, stripeKe
   if (!brand) {
     if (process.env.CHECKOUT_PROMO_CONSENT === 'stripe') {
       params.set('consent_collection[promotions]', 'auto');
-    } else {
+    } else if (process.env.CHECKOUT_PROMO_CONSENT === 'dropdown') {
       params.set('custom_fields[0][key]', 'fp_emails');
       params.set('custom_fields[0][type]', 'dropdown');
       params.set('custom_fields[0][label][type]', 'custom');

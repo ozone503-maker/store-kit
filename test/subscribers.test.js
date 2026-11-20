@@ -86,7 +86,9 @@ test('signed unsubscribe: GET no change, POST unsubscribes, forget deletes, bad 
 test('checkout opt-in: dropdown defaulting to no; Stripe promotions only when enabled', async () => {
   const cap = [];
   const mock = async (url, init) => { cap.push(init); return new Response(JSON.stringify({ id: 'cs_test_x', url: 'https://checkout.stripe.com/c/pay/x' }), { status: 200 }); };
+  process.env.CHECKOUT_PROMO_CONSENT = 'dropdown';
   await checkout(req({ items: [{ sku: 'FP-SAMPLE', quantity: 1 }] }, {}, 'https://x/api/checkout'), { fetchImpl: mock });
+  delete process.env.CHECKOUT_PROMO_CONSENT;
   let p = new URLSearchParams(cap[0].body);
   assert.equal(p.get('consent_collection[promotions]'), null);
   assert.equal(p.get('custom_fields[0][key]'), 'fp_emails');
