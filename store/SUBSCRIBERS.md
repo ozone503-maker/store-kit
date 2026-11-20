@@ -4,11 +4,17 @@ Where signups come from
 - Footer form on every fruitypuppy.com page and every Fruity Puppy store page. Posts to
   `https://www.fruitypuppy.com/store/api/subscribe` (email only, honeypot field `website`, rate-limited
   5 per IP per 10 min and 500 per hour overall, deduped by lowercase email).
-- Stripe Checkout: Fruity Puppy sessions ask for `consent_collection[promotions]=auto` (Stripe's
-  "keep me updated" box, unchecked by default). When `checkout.session.completed` arrives with
-  `consent.promotions = "opt_in"`, the buyer joins the list with source `checkout:<SKU>` (e.g.
-  `checkout:FP-SAMPLE`). Unticked = not added. Every order stores `consent.promotions` either way.
-  Brobots/Kudoken checkouts don't collect Fruity Puppy consent.
+- Stripe Checkout (Fruity Puppy only, never Brobots/Kudoken). Two modes:
+  - Now (default): a checkout field "Fruity Puppy emails? Unsubscribe anytime." with options
+    "No thanks" (preselected) / "Yes, send me skin news" (Stripe custom_fields key `fp_emails`).
+    Only "yes" joins the list (consent_version `checkout-dropdown-2026-11-20`).
+  - Stripe's own promotions checkbox (`consent_collection[promotions]=auto`, unchecked by default).
+    Stripe rejected it on 2026-11-20 with: "To set `consent_collection.promotions`, please visit
+    https://dashboard.stripe.com/settings/checkout to agree to the Terms of Service." After accepting those
+    terms in the Stripe dashboard, set `CHECKOUT_PROMO_CONSENT=stripe` on Vercel (fruity-puppy-store) and
+    redeploy to switch. `consent.promotions = "opt_in"` then joins the list.
+  - Opted-in buyers get source `checkout:<SKU>` (e.g. `checkout:FP-SAMPLE`; FP-SAMPLE buyers only if they
+    opted in). Every order stores `consent` = { promotions, dropdown, method, opted_in }.
 
 Storage
 - Upstash Redis (same database as orders): `fps:subs:<email>` holds one JSON record; `fps:subs:_index`
@@ -41,5 +47,6 @@ Notifications (OFF)
   signup through Resend (needs RESEND_API_KEY + ORDER_EMAIL_FROM on a verified domain). Left off.
 - Nothing in this code sends welcome or marketing email. Use the CSV with your email tool.
 
-Env vars: UNSUBSCRIBE_SECRET (required for unsubscribe links and the IP-hash salt), SIGNUP_NOTIFY_TO,
+Env vars: CHECKOUT_PROMO_CONSENT (unset = dropdown; `stripe` = Stripe checkbox), FP_PROXY_KEY (shared with the
+main site so the store sees the visitor IP behind the www proxy), UNSUBSCRIBE_SECRET (required for unsubscribe links and the IP-hash salt), SIGNUP_NOTIFY_TO,
 SIGNUP_NOTIFY_ENABLED (unset = off). Shares UPSTASH_REDIS_REST_URL/TOKEN and ADMIN_TOKEN with orders.
