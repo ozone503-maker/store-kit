@@ -42,7 +42,11 @@ test('enabled: sends once with idempotency key, accurate totals, escaped html; f
   await dispatchConfirmation(await store.getOrder(SID), store, { cfg, fetchImpl: f });
   assert.equal(calls.length, 2);
 });
-test('render has no address or payment data', () => {
-  const m = renderConfirmation({ id: SID, currency: 'usd', amount_total_cents: 100, items: [], shipping: { address: { line1: '1 Secret St' } }, payment_intent: 'pi_x' });
-  assert.ok(!m.html.includes('Secret') && !m.text.includes('pi_x'));
+test('render shows order number, preorder note, totals and ship-to address but no payment ids', () => {
+  const m = renderConfirmation({ id: SID, order_number: 'FP-1001', currency: 'usd', amount_subtotal_cents: 5999, amount_shipping_cents: 0, amount_tax_cents: 0, amount_total_cents: 5999,
+    items: [{ title: 'Fruity Puppy Original - 2 oz', quantity: 1, amount_total_cents: 5999, note: 'Preorder, ships Dec 1' }],
+    shipping: { name: 'Ana Kai', address: { line1: '1 Palm St', city: 'Hilo', state: 'HI', postal_code: '96720', country: 'US' } }, payment_intent: 'pi_x' });
+  assert.match(m.subject, /FP-1001/);
+  for (const s of ['Order FP-1001', 'Preorder, ships Dec 1', 'Subtotal: $59.99', 'Total paid: $59.99', 'Ana Kai', '1 Palm St', 'Hilo, HI 96720']) assert.ok(m.text.includes(s), s);
+  assert.ok(m.html.includes('1 Palm St') && !m.html.includes('pi_x') && !m.text.includes('pi_x'));
 });

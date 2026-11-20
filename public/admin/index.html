@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Orders · Fruity Puppy admin</title>
+<style>
+body{font-family:system-ui,Arial,sans-serif;margin:0;background:#fff8ef;color:#251a1d}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e8d9d0;background:#fff}
+h1{font-size:18px;margin:0}main{padding:16px 20px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+select,input,button{font:inherit;padding:7px 10px;border:1px solid #c9b8ae;border-radius:6px;background:#fff}
+button{cursor:pointer}button.primary{background:#c45c4a;color:#fff;border-color:#c45c4a}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:14px}
+th,td{border-bottom:1px solid #eee2da;padding:8px;text-align:left;vertical-align:top}
+tr.row{cursor:pointer}tr.row:hover{background:#fdf1e8}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:12px;background:#eee2da}
+.tag.paid,.tag.shipped,.tag.sent{background:#d8eed8}.tag.queued,.tag.handoff_pending,.tag.pending,.tag.partially_shipped{background:#fbe8c4}
+.tag.failed,.tag.refunded,.tag.cancelled{background:#f6d0cb}
+.detail td{background:#fffaf5}.detail .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.muted{color:#6d5a5e;font-size:13px}.err{color:#a3271b}#login{max-width:360px;margin:60px auto}
+#login input{width:100%;box-sizing:border-box;margin:8px 0}
+.ship{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+</style>
+</head><body>
+<header><h1>Fruity Puppy orders</h1><div><span id="emailstate" class="muted"></span> <button id="logout" hidden>Log out</button></div></header>
+<div id="login" hidden>
+  <p>Enter the admin token.</p>
+  <input id="tok" type="password" autocomplete="off">
+  <button class="primary" id="go">Open orders</button>
+  <p id="loginerr" class="err"></p>
+</div>
+<main id="app" hidden>
+  <div class="bar">
+    <select id="fpay"><option value="">All payments</option><option>paid</option><option>pending</option><option>refunded</option><option>failed</option><option>expired</option></select>
+    <select id="ffl"><option value="">All fulfillment</option><option value="queued">queued (3PL to ship)</option><option value="handoff_pending">handoff_pending (has Printify)</option><option>partially_shipped</option><option>shipped</option><option>cancelled</option></select>
+    <input id="fq" placeholder="Search number, email, name, SKU">
+    <button id="refresh">Refresh</button>
+    <button id="csv">Export CSV</button>
+    <button id="retry">Retry due emails</button>
+    <span id="msg" class="muted"></span>
+  </div>
+  <table><thead><tr><th>Order</th><th>Date (HST)</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Fulfillment</th><th>Emails</th></tr></thead><tbody id="rows"></tbody></table>
+</main>
+<script>
+const BASE = location.pathname.startsWith('/store') ? '/store' : '';
+const API = BASE + '/api/admin-orders';
+const KEY = 'fps-admin-token';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = (c, cur) => c == null ? '' : new Intl.NumberFormat('en-US', { style: 'currency', currency: (cur || 'usd').toUpperCase() }).format(c / 100);
+const hst = ms => ms ? new Intl.DateTimeFormat('en-US', { timeZone: 'Pacific/Honolulu', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ms)) : '';
+const tag = s => s ? `<span class="tag ${esc(s)}">${esc(s.replace(/_/g, ' '))}</span>` : '';
+let orders = [];
+const token = () => sessionStorage.getItem(KEY) || '';
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, { ...opts, headers: { ...(opts.headers || {}), Authorization: 'Bearer ' + token(), ...(opts.body ? { 'Content-Type': 'application/json' } : {}) } });
+  if (r.status === 401) { sessionStorage.removeItem(KEY); showLogin('Token not accepted.'); throw new Error('unauthorized'); }
+  return r;
+}
+function showLogin(err) { $('app').hidden = true; $('logout').hidden = true; $('login').hidden = false; $('loginerr').textContent = err || ''; }
+function query() { const p = new URLSearchParams(); if ($('fpay').value) p.set('payment', $('fpay').value); if ($('ffl').value) p.set('fulfillment', $('ffl').value); if ($('fq').value.trim()) p.set('q', $('fq').value.trim()); return p; }
+async function load() {
+  $('msg').textContent = 'Loading…';
+  const r = await api('?' + query());
+  const d = await r.json();
+  if (!r.ok) { $('msg').textContent = d.error || 'Error'; return; }
+  orders = d.orders || [];
+  $('emailstate').textContent = `Customer emails: ${d.email && d.email.customer ? 'ON' : 'off'} · 3PL emails: ${d.email && d.email.threepl ? 'ON' : 'off'}`;
+  $('msg').textContent = orders.length + ' order' + (orders.length === 1 ? '' : 's');
+  render();
+}
+function emails(o) {
+  const s = (o.shipments || []).map(x => x.email && x.email.status).filter(Boolean);
+  return [o.confirmation_email && 'thanks ' + o.confirmation_email.status, o.threepl_email && '3PL ' + o.threepl_email.status, s.length && 'ship ' + s.join('/')].filter(Boolean).map(esc).join('<br>');
+}
+function render() {
+  $('rows').innerHTML = orders.map((o, i) => `<tr class="row" data-i="${i}"><td><b>${esc(o.order_number || o.id.slice(0, 14))}</b>${o.livemode ? '' : ' <span class="tag">test</span>'}</td><td>${esc(hst(o.created_at_ms))}</td><td>${esc(o.shipping && o.shipping.name || '')}<br><span class="muted">${esc(o.email || '')}</span></td><td>${(o.items || []).map(x => esc(x.quantity + ' × ' + x.title)).join('<br>')}</td><td>${esc(money(o.amount_total_cents, o.currency))}${o.amount_refunded_cents ? '<br><span class="err">-' + esc(money(o.amount_refunded_cents, o.currency)) + '</span>' : ''}</td><td>${tag(o.payment)}</td><td>${tag(o.fulfillment)}</td><td class="muted">${emails(o)}</td></tr><tr class="detail" id="d${i}" hidden><td colspan="8"></td></tr>`).join('') || '<tr><td colspan="8" class="muted">No orders yet.</td></tr>';
+  document.querySelectorAll('tr.row').forEach(tr => tr.onclick = () => toggle(+tr.dataset.i));
+}
+function toggle(i) {
+  const row = $('d' + i); if (!row.hidden) { row.hidden = true; return; }
+  const o = orders[i]; const a = (o.shipping && o.shipping.address) || {};
+  const groups = Object.entries(o.groups || {});
+  row.firstElementChild.innerHTML = `<div class="grid">
+  <div><b>Ship to</b><br>${[o.shipping && o.shipping.name, a.line1, a.line2, [a.city, a.state, a.postal_code].filter(Boolean).join(' '), a.country].filter(Boolean).map(esc).join('<br>')}<br>Phone: ${esc(o.phone || '-')}<br>Notes: ${esc(o.notes || '-')}</div>
+  <div><b>Ledger</b><br>Subtotal ${esc(money(o.amount_subtotal_cents, o.currency))} · Discount ${esc(money(o.amount_discount_cents || 0, o.currency))}<br>Shipping ${esc(money(o.amount_shipping_cents, o.currency))} · Tax ${esc(money(o.amount_tax_cents || 0, o.currency))}<br>Total ${esc(money(o.amount_total_cents, o.currency))} · Stripe fee ${esc(o.stripe_fee_cents == null ? '–' : money(o.stripe_fee_cents, o.currency))}<br>Net ${esc(o.net_cents == null ? '–' : money(o.net_cents, o.currency))} · Refunded ${esc(money(o.amount_refunded_cents || 0, o.currency))}<br><span class="muted">${esc(o.id)}</span></div>
+  <div><b>Fulfillment</b>${groups.map(([g, st]) => `<div><b>${esc(g)}</b> ${tag(st.status)} ${st.printify_order_id ? '<span class="muted">Printify ' + esc(st.printify_order_id) + '</span>' : ''} ${st.last_error ? '<span class="err">' + esc(st.last_error) + '</span>' : ''}
+    ${st.status !== 'shipped' && o.payment === 'paid' ? `<div class="ship"><select data-g="${esc(g)}" class="car"><option value="usps">USPS</option><option value="ups">UPS</option><option value="fedex">FedEx</option><option value="other">Other</option></select><input class="trk" placeholder="Tracking number"><input class="url" placeholder="Link (Other only)"><button class="primary shipbtn" data-g="${esc(g)}">Mark shipped</button>${g === 'printify' ? '<button class="pfy">Retry Printify</button>' : ''}</div>` : ''}</div>`).join('')}
+    ${(o.shipments || []).map(s => `<div class="muted">${esc(s.group)}: ${esc(s.carrier)} ${s.tracking_url ? `<a href="${esc(s.tracking_url)}" target="_blank" rel="noopener">${esc(s.tracking_number)}</a>` : esc(s.tracking_number)} · ${esc(s.source)}</div>`).join('')}</div>
+  <div><b>Emails</b><br><button class="rs" data-k="confirmation">Resend thank-you</button> <button class="rs" data-k="threepl">Resend 3PL</button> <button class="rs" data-k="shipping">Resend shipping</button><p class="muted out"></p></div></div>`;
+  row.hidden = false;
+  const out = row.querySelector('.out');
+  row.querySelectorAll('.shipbtn').forEach(b => b.onclick = async () => {
+    const box = b.parentElement; const body = { action: 'ship', id: o.id, group: b.dataset.g, carrier: box.querySelector('.car').value, tracking_number: box.querySelector('.trk').value.trim(), tracking_url: box.querySelector('.url').value.trim() || undefined };
+    const r = await api('', { method: 'POST', body: JSON.stringify(body) }); const d = await r.json();
+    out.textContent = r.ok ? 'Marked shipped.' : (d.error || 'Error'); if (r.ok) load();
+  });
+  row.querySelectorAll('.pfy').forEach(b => b.onclick = async () => { const r = await api('', { method: 'POST', body: JSON.stringify({ action: 'printify', id: o.id }) }); const d = await r.json(); out.textContent = JSON.stringify(d.result || d); load(); });
+  row.querySelectorAll('.rs').forEach(b => b.onclick = async () => { const r = await api('', { method: 'POST', body: JSON.stringify({ action: 'resend', id: o.id, kind: b.dataset.k }) }); const d = await r.json(); out.textContent = r.ok ? (d.result && d.result.sending === 'disabled' ? 'Queued (sending is off).' : 'Sent.') : (d.error || 'Error'); });
+}
+$('go').onclick = () => { const t = $('tok').value.trim(); if (!t) return; sessionStorage.setItem(KEY, t); start(); };
+$('tok').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
+$('logout').onclick = () => { sessionStorage.removeItem(KEY); showLogin(); };
+$('refresh').onclick = load; $('fpay').onchange = load; $('ffl').onchange = load;
+$('fq').onkeydown = e => { if (e.key === 'Enter') load(); };
+$('retry').onclick = async () => { const r = await api('', { method: 'POST' }); const d = await r.json(); $('msg').textContent = d.sending === 'disabled' ? 'Email sending is off.' : `Retried ${d.attempted}.`; load(); };
+$('csv').onclick = async () => {
+  const p = query(); p.set('format', 'csv');
+  const r = await api('?' + p); if (!r.ok) { $('msg').textContent = 'Export failed'; return; }
+  const blob = await r.blob(); const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'fruity-puppy-orders-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+function start() { $('login').hidden = true; $('app').hidden = false; $('logout').hidden = false; load().catch(() => {}); }
+token() ? start() : showLogin();
+</script>
+</body></html>

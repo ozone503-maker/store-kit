@@ -3,7 +3,7 @@ import { verifyStripeSignature } from '../lib/stripe.js';
 import { applyCheckoutEvent } from '../lib/orders.js';
 import { getOrderStore } from '../lib/order-store.js';
 
-// Stripe → order record. Fails closed (503, Stripe retries for up to 3 days)
+// Stripe → order record (checkout.session.* and charge.refunded). Fails closed (503, Stripe retries for up to 3 days)
 // when the signing secret or the order store is not configured.
 export async function POST(request, deps = {}) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -18,7 +18,7 @@ export async function POST(request, deps = {}) {
   try { event = JSON.parse(raw); } catch { return json({ error: 'Bad JSON' }, 400); }
 
   try {
-    const result = await applyCheckoutEvent(event, { store, fetchImpl: deps.fetchImpl, emailFetch: deps.emailFetch });
+    const result = await applyCheckoutEvent(event, { store, fetchImpl: deps.fetchImpl, emailFetch: deps.emailFetch, emailCfg: deps.emailCfg, fulfill: deps.fulfill });
     return json({ received: true, ...('duplicate' in result ? { duplicate: true } : {}) });
   } catch (err) {
     console.error('stripe-webhook failed', event.type, err.message);

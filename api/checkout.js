@@ -81,6 +81,7 @@ export async function createStripeSession({ lines, config, brand, hint, stripeKe
   params.set('cancel_url', urls.cancel_url);
   params.set('automatic_tax[enabled]', 'false');
   params.set('shipping_address_collection[allowed_countries][0]', 'US');
+  params.set('phone_number_collection[enabled]', 'true'); // the 3PL and carriers need a phone number
   params.set('metadata[brand]', brand || '');
 
   let shippingCents = 0;

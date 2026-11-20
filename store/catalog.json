@@ -28,7 +28,8 @@
           "active": true
         }
       ],
-      "checkout_note": "Preorder, ships Dec 1"
+      "checkout_note": "Preorder, ships Dec 1",
+      "threepl_note": "Ship with Dec 1 batch"
     },
     {
       "id": "fpx",

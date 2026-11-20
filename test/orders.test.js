@@ -105,7 +105,7 @@ test('paid order persisted from Stripe line items; duplicate ignored', async () 
   assert.deepEqual(o.items.map(i => [i.sku, i.quantity, i.fulfiller_adapter]), [['FP-2OZ', 2, 'manual'], ['FP-TEE-WHITE', 1, 'printify']]);
   const dup = await webhook(signed(evt('evt_paid', 'checkout.session.completed')), { store, fetchImpl: stripeMock() });
   assert.equal((await dup.json()).duplicate, true);
-  assert.equal((await store.getOrder(SID)).history.length, 1);
+  assert.equal((await store.getOrder(SID)).history.filter(h => h.event.startsWith('checkout.')).length, 1);
   assert.equal((await store.listOrderIds()).length, 1);
 });
 test('async payment: pending then succeeded; failure path; no downgrade', async () => {
@@ -147,7 +147,10 @@ test('order-status returns only state, no PII', async () => {
   const store = memoryStore();
   await webhook(signed(evt('s1', 'checkout.session.completed')), { store, fetchImpl: stripeMock() });
   const body = await (await status(new Request(`https://x/api/order-status?session_id=${SID}`), { store })).json();
-  assert.deepEqual(body, { status: 'paid', fulfillment: 'handoff_pending' });
+  assert.equal(body.status, 'paid'); assert.equal(body.fulfillment, 'handoff_pending'); assert.equal(body.order_number, 'FP-1001'); assert.equal(body.total_cents, 14798);
+  assert.deepEqual(body.items.map(i => [i.title, i.quantity]), [['Fruity Puppy Original - 2 oz', 2], ['Tee - White', 1]]);
+  const flat = JSON.stringify(body);
+  for (const k of ['email', 'shipping', 'phone', 'payment_intent', 'address', 'a@example.com']) assert.ok(!flat.includes(k), k);
   assert.equal((await status(new Request('https://x/api/order-status?session_id=../../x'), { store })).status, 400);
   assert.equal((await (await status(new Request('https://x/api/order-status?session_id=cs_test_zzzzzzzzzzzzzz'), { store })).json()).status, 'processing');
 });
@@ -174,7 +177,10 @@ test('printify webhook requires valid signature and records tracking', async () 
   assert.equal((await printifyHook(post('https://x', raw, { 'x-pfy-signature': 'sha256=bad' }), { store })).status, 401);
   const r = await printifyHook(post('https://x', raw, { 'x-pfy-signature': sig }), { store });
   assert.equal((await r.json()).matched, true);
-  assert.equal((await store.getOrder(SID)).fulfillment, 'shipped');
+  // mixed cart: the tee shipped from Printify, the jar still waits on the 3PL
+  let o = await store.getOrder(SID);
+  assert.equal(o.fulfillment, 'partially_shipped'); assert.equal(o.groups.printify.status, 'shipped'); assert.equal(o.groups.warehouse.status, 'pending');
+  assert.equal(o.shipments[0].tracking_url, 'https://tools.usps.com/go/TrackConfirmAction?tLabels=9400');
   delete process.env.PRINTIFY_WEBHOOK_SECRET;
   assert.equal((await printifyHook(post('https://x', raw, { 'x-pfy-signature': sig }), { store })).status, 503);
 });

@@ -1,11 +1,59 @@
 {
-  "functions": { "api/*.js": { "includeFiles": "store/**" } },
+  "functions": {
+    "api/*.js": {
+      "includeFiles": "store/**"
+    }
+  },
   "rewrites": [
-    { "source": "/product/:id", "destination": "/api/product?id=:id" },
-    { "source": "/buy/:sku", "destination": "/api/buy?sku=:sku" }
+    {
+      "source": "/product/:id",
+      "destination": "/api/product?id=:id"
+    },
+    {
+      "source": "/buy/:sku",
+      "destination": "/api/buy?sku=:sku"
+    },
+    {
+      "source": "/ship/:id",
+      "destination": "/api/ship?id=:id"
+    }
   ],
   "headers": [
-    { "source": "/admin.html", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/buy/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
+    {
+      "source": "/buy/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/admin/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/ship/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
   ]
 }

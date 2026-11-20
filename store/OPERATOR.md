@@ -72,7 +72,7 @@ Example: "take this design, make me a trucker hat, a duffel bag and standard cat
 Resolve blueprint and provider IDs live from the Printify catalog. Do not hardcode stale IDs.
 
 ## Order flow
-On paid Stripe session, call fulfillOrder with the order object that includes items with printify_* ids and shipping address.
+The Stripe webhook calls fulfillOrder for the Printify lines of a paid order (see store/ORDERS.md). send_to_production stays false.
 Webhook at /api/printify-webhook receives tracking and calls recordTracking.
 
 ## Merch factory

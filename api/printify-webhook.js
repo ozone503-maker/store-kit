@@ -1,10 +1,12 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { recordTracking } from '../lib/orders.js';
+import { recordShipment } from '../lib/orders.js';
+import { getOrderStore } from '../lib/order-store.js';
 import { json } from '../lib/http.js';
 
-// Printify shipment updates. Requires PRINTIFY_WEBHOOK_SECRET (the secret set when the
-// webhook is registered); Printify signs with X-Pfy-Signature: sha256=<hex HMAC of body>.
-// Fails closed when the secret is not configured.
+// Printify shipment updates (topic order:shipment:created). Requires PRINTIFY_WEBHOOK_SECRET (the secret
+// set when the webhook is registered); Printify signs with X-Pfy-Signature: sha256=<hex HMAC of body>.
+// Matches the order by external_id (our order id) or by the Printify order id recorded at submission,
+// marks the Printify lines shipped and emails the customer the tracking link (if emails are enabled).
 export function verifyPrintify(raw, header, secret) {
   if (!secret || !header) return false;
   const given = Buffer.from(header.replace(/^sha256=/, ''));
@@ -20,18 +22,23 @@ export async function POST(request, deps = {}) {
 
   let body;
   try { body = JSON.parse(raw); } catch { return json({ error: 'Bad JSON' }, 400); }
-  const event = body.resource?.data || body.resource || body;
-  const orderId = event.external_id || event.order_external_id;
-  const shipment = (event.shipments || [])[0] || {};
-  const tracking = shipment.tracking_number || shipment.number || event.tracking_number;
-  if (!orderId || !tracking) return json({ ok: true, ignored: true });
+  const data = body.resource?.data || body.resource || body;
+  const shipment = (data.shipments || [])[0] || {};
+  const carrierObj = data.carrier && typeof data.carrier === 'object' ? data.carrier : {};
+  const tracking = carrierObj.tracking_number || shipment.tracking_number || shipment.number || data.tracking_number;
+  const store = deps.store !== undefined ? deps.store : getOrderStore();
+  if (!store) return json({ error: 'Temporary failure' }, 503);
 
   try {
-    const saved = await recordTracking(orderId, 'printify', {
-      carrier: shipment.carrier || event.carrier || 'Printify',
+    let orderId = data.external_id || data.order_external_id || null;
+    const pfyId = body.resource?.id || data.order_id || data.id;
+    if (!orderId && pfyId) orderId = await store.getAlias(`pfy:${pfyId}`);
+    if (!orderId || !tracking) return json({ ok: true, ignored: true });
+    const saved = await recordShipment(orderId, 'printify', {
+      carrier: carrierObj.code || (typeof data.carrier === 'string' ? data.carrier : '') || shipment.carrier || 'other',
       tracking_number: tracking,
-      tracking_url: shipment.tracking_url || shipment.url || event.tracking_url || null,
-    }, deps.store !== undefined ? { store: deps.store } : {});
+      tracking_url: carrierObj.tracking_url || shipment.tracking_url || shipment.url || data.tracking_url || null,
+    }, { store, source: 'printify', emailFetch: deps.emailFetch, emailCfg: deps.emailCfg });
     return json({ ok: true, matched: !!saved });
   } catch (err) {
     return json({ error: 'Temporary failure' }, err.status || 500);
