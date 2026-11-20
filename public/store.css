@@ -135,3 +135,7 @@ a:focus-visible,button:focus-visible,input:focus-visible+span,select:focus-visib
 .soon{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:99px;background:#2b1630;color:#fff;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}
 .logo-var{margin:4px 0 0;font-size:.8rem;opacity:.75;line-height:1.35}
 .logo-buy{display:inline-block;margin-top:8px;text-decoration:none;text-align:center}
+
+.jar-note,.preorder-note{display:block;margin:6px 0 0;font-weight:700;font-size:16px;color:var(--ink)}
+.jars.top .jar-note{font-size:18px;margin-top:8px}
+.product .preorder-note{margin:0 0 10px;font-size:18px}

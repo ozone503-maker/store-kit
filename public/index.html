@@ -69,7 +69,7 @@ function jarCard(p) {
   if (!vs.length) return `<li class="jar out"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="stock-out">${p.coming_soon ? 'Coming soon' : 'Out of stock'}</span></li>`;
   const v = vs[0];
   const price = v.price_cents ? money(v.price_cents) : 'Free, $5 shipping';
-  return `<li class="jar"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="jar-price">${price}</span><button class="buy" type="button" data-add-sku="${esc(v.sku)}">Add to cart</button></li>`;
+  return `<li class="jar"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a>${p.preorder ? `<span class="jar-note">${esc(p.preorder)}</span>` : ''}<span class="jar-price">${price}</span><button class="buy" type="button" data-add-sku="${esc(v.sku)}">Add to cart</button></li>`;
 }
 
 function logoCard(p) {

@@ -60,6 +60,7 @@ export function GET(request) {
   <div class="images">${images || '<p>No photos yet</p>'}</div>
   <div class="info">
     <h1>${esc(product.title)}</h1>
+    ${product.preorder ? `<p class="preorder-note">${esc(product.preorder)}</p>` : ''}
     <p class="desc">${esc(product.description || '')}</p>
     <p class="price">${price}</p>
     ${options ? `<label>Color <select id="sku">${options}</select></label>` : ''}
