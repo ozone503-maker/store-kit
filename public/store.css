@@ -135,3 +135,7 @@ a:focus-visible,button:focus-visible,input:focus-visible+span,select:focus-visib
 .soon{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:99px;background:#2b1630;color:#fff;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}
 .logo-var{margin:4px 0 0;font-size:.8rem;opacity:.75;line-height:1.35}
 .logo-buy{display:inline-block;margin-top:8px;text-decoration:none;text-align:center}
+.fp-social{display:flex;justify-content:center;align-items:center;gap:16px;margin:14px 0 0}
+.fp-social a{display:inline-flex;line-height:0}
+.fp-social svg{width:18px;height:18px;display:block}
+.fp-social a:hover{opacity:.75}

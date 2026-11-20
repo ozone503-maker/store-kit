@@ -1,3 +1,4 @@
+import { SOCIAL_HTML } from '../lib/social-html.js';
 import { loadStore } from '../lib/store.js';
 import { rateLimit } from '../lib/rate.js';
 
@@ -68,7 +69,7 @@ export function GET(request) {
   </div>
 </main>
 ${suggestHtml}
-<footer class="fp-foot"><a id="back" href="../">Back to shop</a></footer>
+<footer class="fp-foot"><a id="back" href="../">Back to shop</a>${brand || /brobots|kudoken/.test(url.hostname) ? '' : SOCIAL_HTML}</footer>
 <script>
 const BASE = location.pathname.startsWith('/store') ? '/store' : '';
 const brand = new URLSearchParams(location.search).get('brand') || (location.hostname.includes('kudoken') ? 'kudoken' : location.hostname.includes('brobots') ? 'brobots' : '');

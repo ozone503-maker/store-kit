@@ -11,6 +11,7 @@ const brandQ = BRAND ? '?brand=' + BRAND : '';
 const CART_KEY = 'store-cart-' + (BRAND || 'default');
 let catalog = null;
 if (!BRAND) document.body.classList.add('fp');
+else document.querySelectorAll('.fp-social').forEach(el => el.remove());
 
 // Shop and Back to shop links go to the store root (/store on fruitypuppy.com), not the site homepage.
 document.querySelectorAll('a[data-shop-home]').forEach(a => { a.href = (BASE || '/') + brandQ; });
