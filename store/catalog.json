@@ -249,33 +249,34 @@
           "sku": "FP-TEE-WHITE",
           "title": "White",
           "price_cents": 2800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-TEE-CARNATION",
           "title": "Carnation",
           "price_cents": 2800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-TEE-PLUM",
           "title": "Plum",
           "price_cents": 2800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-TEE-GREY",
           "title": "Grey",
           "price_cents": 2800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-TEE-BLACK",
           "title": "Black",
           "price_cents": 2800,
-          "active": true
+          "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "fp-long-sleeve",
@@ -343,33 +344,34 @@
           "sku": "FP-LS-WHITE",
           "title": "White",
           "price_cents": 3200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-LS-CARNATION",
           "title": "Carnation",
           "price_cents": 3200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-LS-PLUM",
           "title": "Plum",
           "price_cents": 3200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-LS-GREY",
           "title": "Grey",
           "price_cents": 3200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-LS-BLACK",
           "title": "Black",
           "price_cents": 3200,
-          "active": true
+          "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "fp-beach",
@@ -431,33 +433,34 @@
           "sku": "FP-BEACH-WHITE",
           "title": "White",
           "price_cents": 4200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BEACH-CARNATION",
           "title": "Carnation",
           "price_cents": 4200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BEACH-PLUM",
           "title": "Plum",
           "price_cents": 4200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BEACH-GREY",
           "title": "Grey",
           "price_cents": 4200,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BEACH-BLACK",
           "title": "Black",
           "price_cents": 4200,
-          "active": true
+          "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "fp-kilauea",
@@ -520,33 +523,34 @@
           "sku": "FP-KIL-WHITE",
           "title": "White",
           "price_cents": 4800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-KIL-CARNATION",
           "title": "Carnation",
           "price_cents": 4800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-KIL-PLUM",
           "title": "Plum",
           "price_cents": 4800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-KIL-GREY",
           "title": "Grey",
           "price_cents": 4800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-KIL-BLACK",
           "title": "Black",
           "price_cents": 4800,
-          "active": true
+          "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "fp-mauna-kea",
@@ -608,33 +612,34 @@
           "sku": "FP-MK-WHITE",
           "title": "White",
           "price_cents": 6800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-MK-CARNATION",
           "title": "Carnation",
           "price_cents": 6800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-MK-PLUM",
           "title": "Plum",
           "price_cents": 6800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-MK-GREY",
           "title": "Grey",
           "price_cents": 6800,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-MK-BLACK",
           "title": "Black",
           "price_cents": 6800,
-          "active": true
+          "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "fp-blanket",
@@ -675,33 +680,34 @@
           "sku": "FP-BLANK-WHITE",
           "title": "White",
           "price_cents": 4500,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BLANK-CARNATION",
           "title": "Carnation",
           "price_cents": 4500,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BLANK-PLUM",
           "title": "Plum",
           "price_cents": 4500,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BLANK-GREY",
           "title": "Grey",
           "price_cents": 4500,
-          "active": true
+          "active": false
         },
         {
           "sku": "FP-BLANK-BLACK",
           "title": "Black",
           "price_cents": 4500,
-          "active": true
+          "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "logo-fruity-puppy-original-tee",
