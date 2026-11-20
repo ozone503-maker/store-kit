@@ -121,7 +121,7 @@ export async function createStripeSession({ lines, config, brand, hint, stripeKe
     return { error: 'Checkout is unavailable right now', status: 502 };
   }
   if (!res.ok) {
-    console.error('Stripe checkout error', session?.error?.type, session?.error?.code);
+    console.error('Stripe checkout error', session?.error?.type, session?.error?.code, session?.error?.param, String(session?.error?.message || '').slice(0, 300));
     return { error: 'Checkout could not be started', status: 502 };
   }
   return { url: session.url, id: session.id };
