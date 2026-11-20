@@ -1066,6 +1066,83 @@
       "printify_product_id": "6aefc58e3e4c1665fa0c0d0d"
     },
     {
+      "id": "logo-fruity-puppy-original-crewneck",
+      "title": "Fruity Puppy Original Crewneck",
+      "brand": "Fruity Puppy",
+      "type": "Apparel",
+      "collection": "Logo",
+      "logo": "Fruity Puppy Original",
+      "draft": true,
+      "description": "The Fruity Puppy Original label art on a Comfort Colors 1566 garment-dyed crewneck. Heavy, soft, a little faded on purpose. Ipo wore it to the fridge and back. Coming soon. Not for sale until the printer confirms colors and sizes.",
+      "model": "Ipo",
+      "images": [
+        "img/logo/fruity-puppy-original-crewneck.webp"
+      ],
+      "tags": [
+        "merch",
+        "logo",
+        "draft"
+      ],
+      "pairs": [],
+      "fulfiller": "printify",
+      "size_chart": {
+        "title": "Sizes",
+        "note": "Unisex sizing from the garment maker.",
+        "headers": [
+          "Size"
+        ],
+        "rows": [
+          [
+            "S"
+          ],
+          [
+            "M"
+          ],
+          [
+            "L"
+          ],
+          [
+            "XL"
+          ],
+          [
+            "2XL"
+          ]
+        ]
+      },
+      "variants": [
+        {
+          "sku": "DRAFT-FPO-CREW-WHITE",
+          "title": "White",
+          "price_cents": 4200,
+          "active": false
+        },
+        {
+          "sku": "DRAFT-FPO-CREW-IVORY",
+          "title": "Ivory",
+          "price_cents": 4200,
+          "active": false
+        },
+        {
+          "sku": "DRAFT-FPO-CREW-BLOSSOM",
+          "title": "Blossom",
+          "price_cents": 4200,
+          "active": false
+        },
+        {
+          "sku": "DRAFT-FPO-CREW-PEPPER",
+          "title": "Pepper",
+          "price_cents": 4200,
+          "active": false
+        },
+        {
+          "sku": "DRAFT-FPO-CREW-BLACK",
+          "title": "Black",
+          "price_cents": 4200,
+          "active": false
+        }
+      ]
+    },
+    {
       "id": "logo-fruity-puppy-original-beach-hoodie",
       "title": "Fruity Puppy Original Beach Hoodie",
       "brand": "Fruity Puppy",

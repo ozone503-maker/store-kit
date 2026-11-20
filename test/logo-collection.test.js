@@ -11,9 +11,9 @@ const drafts = logo.filter(p => p.draft);
 const post = items => new Request('https://x/api/checkout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ items }) });
 const stripeOk = cap => async (url, init) => { cap.push(init); return new Response(JSON.stringify({ id: 'cs_test_1', url: 'https://checkout.stripe.com/x' }), { status: 200 }); };
 
-test('label collection: 36 listings, one image each', () => {
-  assert.equal(logo.length, 36);
-  assert.equal(new Set(logo.map(p => p.images[0])).size, 36);
+test('label collection: 36 core listings plus daily adds, one image each', () => {
+  assert.ok(logo.length >= 36);
+  assert.equal(new Set(logo.map(p => p.images[0])).size, logo.length);
   for (const p of logo) {
     assert.equal(p.images.length, 1, p.id);
     const f = new URL('../public/' + p.images[0], import.meta.url);
@@ -35,9 +35,9 @@ test('24 live listings map every variant to a real Printify product and variant'
   }
 });
 
-test('12 drafts (beach hoodies, blankets) stay unbuyable', async () => {
-  assert.equal(drafts.length, 12);
-  assert.ok(drafts.every(p => /beach-hoodie|blanket/.test(p.id)));
+test('drafts (beach hoodies, blankets, daily adds) stay unbuyable', async () => {
+  assert.ok(drafts.length >= 12);
+  assert.equal(drafts.filter(p => /beach-hoodie|blanket/.test(p.id)).length, 12);
   assert.ok(drafts.every(p => p.variants.every(v => v.active === false)));
   const res = await checkout(post([{ sku: drafts[0].variants[0].sku, quantity: 1 }]), { fetchImpl: () => { throw new Error('must not call Stripe'); } });
   assert.equal(res.status, 400);
