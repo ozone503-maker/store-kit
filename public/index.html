@@ -66,7 +66,7 @@ function merchCard(p) {
 function jarCard(p) {
   const vs = buyable(p);
   const img = p.images[0] ? `<img src="${esc(imgSrc(p.images[0]))}" alt="${esc(p.id === 'free-sample' ? 'A real Fruity Puppy sample jar held between two fingers' : p.title)}" loading="lazy">` : '<div class="jar-blank" aria-hidden="true"></div>';
-  if (!vs.length) return `<li class="jar out"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="stock-out">Out of stock</span></li>`;
+  if (!vs.length) return `<li class="jar out"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="stock-out">${p.coming_soon ? 'Coming soon' : 'Out of stock'}</span></li>`;
   const v = vs[0];
   const price = v.price_cents ? money(v.price_cents) : 'Free, $5 shipping';
   return `<li class="jar"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="jar-price">${price}</span><button class="buy" type="button" data-add-sku="${esc(v.sku)}">Add to cart</button></li>`;
@@ -118,7 +118,7 @@ function fruityPuppy(data, shop) {
   ${logoDrafts.length ? logoSection(logoDrafts) : ''}
   ${out.length ? `<section class="fridge" aria-labelledby="fridge-h">
     <h2 id="fridge-h">More from the fridge</h2>
-    <p class="fridge-sub">Out of stock right now</p>
+    <p class="fridge-sub">${out.every(p => p.coming_soon) ? 'Coming soon' : 'Out of stock right now'}</p>
     <ul class="jars small">${out.map(jarCard).join('')}</ul>
   </section>` : ''}
   <figure class="outlet">

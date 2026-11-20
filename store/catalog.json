@@ -55,7 +55,8 @@
           "price_cents": 5999,
           "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "lava-guava",
@@ -79,7 +80,8 @@
           "price_cents": 5999,
           "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "thorny-toad",
@@ -87,7 +89,7 @@
       "brand": "Fruity Puppy",
       "type": "Skincare",
       "collection": "Toner",
-      "description": "Botanical toner for balance and clarity. Stickerbush cane, green tea, guava leaf, lemon peel, jungle mint.",
+      "description": "Hawaiian botanical toner brewed from stickerbush cane, green tea, guava leaf, lemon peel and jungle mint. No alcohol. No artificial astringents. No synthetic fragrance. 2 fl oz (59 ml). Keep refrigerated.",
       "images": [
         "img/thorny-toad.webp"
       ],
@@ -102,9 +104,9 @@
       "variants": [
         {
           "sku": "TT-JUICE",
-          "title": "Bottle",
+          "title": "2 fl oz",
           "price_cents": 2999,
-          "active": false
+          "active": true
         }
       ]
     },
@@ -128,7 +130,8 @@
           "price_cents": 2999,
           "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "moon-tea",
@@ -155,7 +158,8 @@
           "price_cents": 2999,
           "active": false
         }
-      ]
+      ],
+      "coming_soon": true
     },
     {
       "id": "free-sample",
