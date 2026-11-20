@@ -140,3 +140,11 @@ test('upstash store uses fps:subs: keys and rate keys', async () => {
   const flat = JSON.stringify(cmds);
   assert.ok(flat.includes('fps:subs:a@example.com') && flat.includes('fps:subs:_index') && flat.includes('fps:rl:sub:abc:1'));
 });
+
+test('client IP from the main-site proxy only with the shared key', async () => {
+  const { clientIp } = await import('../lib/subscribers.js');
+  const r = h => new Request('https://x', { headers: { 'x-real-ip': '10.0.0.1', ...h } });
+  assert.equal(clientIp(r({ 'x-fp-client-ip': '203.0.113.5', 'x-fp-proxy-key': 'k1' }), 'k1'), '203.0.113.5');
+  assert.equal(clientIp(r({ 'x-fp-client-ip': '203.0.113.5', 'x-fp-proxy-key': 'nope' }), 'k1'), '10.0.0.1');
+  assert.equal(clientIp(r({ 'x-fp-client-ip': '203.0.113.5', 'x-fp-proxy-key': 'k1' }), undefined), '10.0.0.1');
+});
