@@ -83,8 +83,25 @@ export async function createStripeSession({ lines, config, brand, hint, stripeKe
   params.set('shipping_address_collection[allowed_countries][0]', 'US');
   params.set('phone_number_collection[enabled]', 'true'); // the 3PL and carriers need a phone number
   params.set('metadata[brand]', brand || '');
-  // Fruity Puppy marketing opt-in: Stripe's promotional-emails checkbox, unchecked by default.
-  if (!brand) params.set('consent_collection[promotions]', 'auto');
+  // Fruity Puppy marketing opt-in (never for Brobots/Kudoken), defaults to NO.
+  // Stripe's own promotions checkbox needs the Checkout terms accepted in the Stripe dashboard
+  // (Settings > Checkout); until then, set CHECKOUT_PROMO_CONSENT unset and use a dropdown defaulting to "No thanks".
+  if (!brand) {
+    if (process.env.CHECKOUT_PROMO_CONSENT === 'stripe') {
+      params.set('consent_collection[promotions]', 'auto');
+    } else {
+      params.set('custom_fields[0][key]', 'fp_emails');
+      params.set('custom_fields[0][type]', 'dropdown');
+      params.set('custom_fields[0][label][type]', 'custom');
+      params.set('custom_fields[0][label][custom]', 'Fruity Puppy emails? Unsubscribe anytime.');
+      params.set('custom_fields[0][optional]', 'true');
+      params.set('custom_fields[0][dropdown][default_value]', 'no');
+      params.set('custom_fields[0][dropdown][options][0][label]', 'No thanks');
+      params.set('custom_fields[0][dropdown][options][0][value]', 'no');
+      params.set('custom_fields[0][dropdown][options][1][label]', 'Yes, send me skin news');
+      params.set('custom_fields[0][dropdown][options][1][value]', 'yes');
+    }
+  }
 
   let shippingCents = 0;
   lines.forEach(({ product, variant, quantity }, i) => {

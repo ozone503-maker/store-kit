@@ -83,11 +83,20 @@ test('signed unsubscribe: GET no change, POST unsubscribes, forget deletes, bad 
   assert.equal(await store.countSubs(), 0);
 });
 
-test('checkout asks Stripe for promotions consent (Fruity Puppy only)', async () => {
+test('checkout opt-in: dropdown defaulting to no; Stripe promotions only when enabled', async () => {
   const cap = [];
   const mock = async (url, init) => { cap.push(init); return new Response(JSON.stringify({ id: 'cs_test_x', url: 'https://checkout.stripe.com/c/pay/x' }), { status: 200 }); };
   await checkout(req({ items: [{ sku: 'FP-SAMPLE', quantity: 1 }] }, {}, 'https://x/api/checkout'), { fetchImpl: mock });
-  assert.equal(new URLSearchParams(cap[0].body).get('consent_collection[promotions]'), 'auto');
+  let p = new URLSearchParams(cap[0].body);
+  assert.equal(p.get('consent_collection[promotions]'), null);
+  assert.equal(p.get('custom_fields[0][key]'), 'fp_emails');
+  assert.equal(p.get('custom_fields[0][dropdown][default_value]'), 'no');
+  process.env.CHECKOUT_PROMO_CONSENT = 'stripe';
+  await checkout(req({ items: [{ sku: 'FP-SAMPLE', quantity: 1 }] }, {}, 'https://x/api/checkout'), { fetchImpl: mock });
+  delete process.env.CHECKOUT_PROMO_CONSENT;
+  p = new URLSearchParams(cap[1].body);
+  assert.equal(p.get('consent_collection[promotions]'), 'auto');
+  assert.equal(p.get('custom_fields[0][key]'), null);
 });
 
 function signed(event) {
@@ -112,6 +121,25 @@ test('webhook: opt_in buyer joins list with checkout:<sku>; none/unticked does n
   const o1 = await store.getOrder('cs_test_in'); const o2 = await store.getOrder('cs_test_out');
   assert.equal(o1.consent.promotions, 'opt_in');
   assert.equal(o2.consent.promotions, null);
+  assert.equal(o2.consent.opted_in, false);
+});
+
+test('webhook: dropdown yes joins, default no does not, and it stays out of order notes', async () => {
+  const store = memoryStore();
+  const opts = { store, fetchImpl: lineMock, emailCfg: { enabled: false }, fulfill: async () => ({}) };
+  const f = v => [{ key: 'fp_emails', type: 'dropdown', dropdown: { value: v } }];
+  const a = { ...sess('cs_test_yes', null), consent_collection: null, custom_fields: f('yes'), customer_details: { email: 'yes@example.com' } };
+  const b = { ...sess('cs_test_no', null), consent_collection: null, custom_fields: f('no'), customer_details: { email: 'no@example.com' } };
+  const c = { ...sess('cs_test_blank', null), consent_collection: null, custom_fields: f(null), customer_details: { email: 'blank@example.com' } };
+  for (const [i, s] of [a, b, c].entries()) assert.equal((await webhook(signed({ id: 'evt_d' + i, type: 'checkout.session.completed', data: { object: s } }), opts)).status, 200);
+  const rec = await store.getSub('yes@example.com');
+  assert.equal(rec.source, 'checkout:FP-SAMPLE');
+  assert.equal(rec.consent_version, 'checkout-dropdown-2026-11-20');
+  assert.equal(await store.getSub('no@example.com'), null);
+  assert.equal(await store.getSub('blank@example.com'), null);
+  const o = await store.getOrder('cs_test_no');
+  assert.deepEqual([o.consent.method, o.consent.dropdown, o.consent.opted_in], ['custom_field', 'no', false]);
+  assert.ok(!String(o.notes || '').includes('no'));
 });
 
 test('admin: subscriber count + CSV need the token', async () => {
