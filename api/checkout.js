@@ -83,6 +83,8 @@ export async function createStripeSession({ lines, config, brand, hint, stripeKe
   params.set('shipping_address_collection[allowed_countries][0]', 'US');
   params.set('phone_number_collection[enabled]', 'true'); // the 3PL and carriers need a phone number
   params.set('metadata[brand]', brand || '');
+  // Fruity Puppy marketing opt-in: Stripe's promotional-emails checkbox, unchecked by default.
+  if (!brand) params.set('consent_collection[promotions]', 'auto');
 
   let shippingCents = 0;
   lines.forEach(({ product, variant, quantity }, i) => {

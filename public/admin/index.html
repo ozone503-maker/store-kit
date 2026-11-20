@@ -37,6 +37,8 @@ tr.row{cursor:pointer}tr.row:hover{background:#fdf1e8}
     <button id="refresh">Refresh</button>
     <button id="csv">Export CSV</button>
     <button id="retry">Retry due emails</button>
+    <span class="muted">List: <b id="subcount">–</b> subscribers</span>
+    <button id="subcsv">Export list CSV</button>
     <span id="msg" class="muted"></span>
   </div>
   <table><thead><tr><th>Order</th><th>Date (HST)</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Fulfillment</th><th>Emails</th></tr></thead><tbody id="rows"></tbody></table>
@@ -110,7 +112,16 @@ $('csv').onclick = async () => {
   const blob = await r.blob(); const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = 'fruity-puppy-orders-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click(); URL.revokeObjectURL(a.href);
 };
-function start() { $('login').hidden = true; $('app').hidden = false; $('logout').hidden = false; load().catch(() => {}); }
+async function loadSubs() {
+  const r = await api('?view=subscribers'); if (!r.ok) return;
+  const d = await r.json(); $('subcount').textContent = d.count + (d.subscribed !== undefined && d.subscribed !== d.count ? ' (' + d.subscribed + ' active in latest 100)' : '');
+}
+$('subcsv').onclick = async () => {
+  const r = await api('?view=subscribers&format=csv'); if (!r.ok) { $('msg').textContent = 'Export failed'; return; }
+  const blob = await r.blob(); const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'fruity-puppy-subscribers-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+function start() { $('login').hidden = true; $('app').hidden = false; $('logout').hidden = false; load().catch(() => {}); loadSubs().catch(() => {}); }
 token() ? start() : showLogin();
 </script>
 </body></html>

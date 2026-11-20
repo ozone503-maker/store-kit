@@ -84,6 +84,7 @@ const btn = document.querySelector('.add');
 if (sel && btn) sel.addEventListener('change', () => btn.dataset.addSku = sel.value);
 const s = document.createElement('script');
 s.src = BASE + '/cart.js';
+if (!new URLSearchParams(location.search).get('brand') && !/brobots|kudoken/.test(location.hostname)) { const g = document.createElement('script'); g.src = BASE + '/signup.js'; g.defer = true; document.head.appendChild(g); }
 document.body.appendChild(s);
 </script>
 </body></html>`;

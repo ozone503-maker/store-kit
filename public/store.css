@@ -139,3 +139,12 @@ a:focus-visible,button:focus-visible,input:focus-visible+span,select:focus-visib
 .fp-social a{display:inline-flex;line-height:0}
 .fp-social svg{width:18px;height:18px;display:block}
 .fp-social a:hover{opacity:.75}
+.fp-signup{max-width:440px;margin:22px auto 0;text-align:center}
+.fp-signup-head{margin:0 0 10px;line-height:1.5}.fp-signup-head b{font-family:Georgia,serif;font-weight:400;font-size:18px;display:block}
+.fp-signup-row{display:flex;gap:8px;margin:0;justify-content:center}
+.fp-signup input[type=email]{flex:1;min-width:0;padding:10px 14px;border:1px solid currentColor;border-radius:99px;background:transparent;color:inherit;font:inherit;font-size:14px}
+.fp-signup button{padding:10px 18px;border:0;border-radius:99px;background:#e0517d;color:#fff;font:700 13px Arial,sans-serif;cursor:pointer}
+.fp-signup button:disabled{opacity:.6}
+.fp-signup-consent{display:block;margin-top:8px;font-size:11px;opacity:.75}
+.fp-signup-msg{min-height:1.2em;margin:6px 0 0;font-size:13px}
+.fp-hp,.fp-sr{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}

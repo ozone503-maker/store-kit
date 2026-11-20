@@ -3,10 +3,12 @@ import { getOrderStore } from '../lib/order-store.js';
 import { dispatchDue, hasDue, emailConfig, canSend, canSendThreepl, requeue, CARRIERS, dispatchConfirmation, dispatchThreepl, dispatchShipping } from '../lib/email.js';
 import { recordShipment, submitPrintify } from '../lib/orders.js';
 import { ordersCsv } from '../lib/ledger.js';
+import { subscribersCsv } from '../lib/subscribers.js';
 
 // Operator API for /admin. Every call requires Authorization: Bearer $ADMIN_TOKEN.
 // GET  ?payment=&fulfillment=&q=&limit=   -> { orders }
 // GET  ?format=csv                        -> ledger CSV (same filters)
+// GET  ?view=subscribers[&format=csv]     -> email list count + latest 100, or the full list as CSV
 // POST {}                                 -> retry every due email (no-op while sending is disabled)
 // POST { action:'ship', id, group, carrier, tracking_number, tracking_url? }
 // POST { action:'resend', id, kind: confirmation|threepl|shipping }
@@ -28,6 +30,17 @@ export async function GET(request, deps = {}) {
   if (!store) return json({ error: 'Order store not configured' }, 503);
   const url = new URL(request.url);
   const csv = url.searchParams.get('format') === 'csv';
+  if (url.searchParams.get('view') === 'subscribers') {
+    const emails = await store.listSubEmails(csv ? 20000 : 100);
+    const recs = [];
+    for (const e of emails) { const r = await store.getSub(e); if (r) recs.push(r); }
+    if (csv) {
+      const day = new Date().toISOString().slice(0, 10);
+      return new Response(subscribersCsv(recs), { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="fruity-puppy-subscribers-${day}.csv"`, 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' } });
+    }
+    const count = await store.countSubs();
+    return json({ count, subscribed: recs.filter(r => r.status === 'subscribed').length, recent: recs });
+  }
   const max = csv ? 5000 : 500;
   const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || (csv ? String(max) : '100'), 10) || 100, 1), max);
   const f = { payment: url.searchParams.get('payment') || '', fulfillment: url.searchParams.get('fulfillment') || '', q: (url.searchParams.get('q') || '').trim() };

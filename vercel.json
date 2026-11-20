@@ -16,6 +16,10 @@
     {
       "source": "/ship/:id",
       "destination": "/api/ship?id=:id"
+    },
+    {
+      "source": "/unsubscribe",
+      "destination": "/api/subscribe?action=unsubscribe"
     }
   ],
   "headers": [
@@ -57,6 +61,15 @@
     },
     {
       "source": "/ship/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/unsubscribe",
       "headers": [
         {
           "key": "X-Robots-Tag",

@@ -32,3 +32,6 @@ Queued emails wait on the order while sending is off; `POST /api/admin-orders` (
 - `PRINTIFY_TOKEN`, `PRINTIFY_SHOP_ID`, `PRINTIFY_WEBHOOK_SECRET` (the `secret` used when registering the Printify webhook `order:shipment:created` → `https://fruity-puppy-store.vercel.app/api/printify-webhook`).
 
 Tests: `npm test` (local mocks only; nothing is sent).
+
+## Email list
+Signups (footer + Stripe Checkout opt-in), storage, CSV export and unsubscribe: see [SUBSCRIBERS.md](SUBSCRIBERS.md).
