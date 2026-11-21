@@ -11,5 +11,10 @@
     "check": "node tools/check-store.js",
     "test": "node --test test/*.test.js",
     "factory": "node tools/merch-factory.js"
+  },
+  "description": "Store Kit: one multi-brand store (storefront, Stripe checkout, order book, Printify + 3PL fulfillment).",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ozone503-maker/store-kit"
   }
 }
