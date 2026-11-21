@@ -1,10 +1,26 @@
 # Store Operator Guide (for bots)
 
 ## Env vars needed on Vercel
-- STRIPE_SECRET_KEY
-- PRINTIFY_TOKEN (Personal Access Token from Printify dashboard > My Account > API)
-- PRINTIFY_SHOP_ID (from GET /shops.json or dashboard)
-- Optional: PRINTIFY_WEBHOOK_SECRET
+
+Full table with what each one does: `README.md` → Environment variables. Names only; never print values.
+
+Required: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `KV_REST_API_URL` + `KV_REST_API_TOKEN`
+(Upstash; `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` also work), `ADMIN_TOKEN`, `UNSUBSCRIBE_SECRET`.
+
+Printify: `PRINTIFY_TOKEN` (Personal Access Token, Printify > My Account > API), `PRINTIFY_SHOP_ID`
+(`GET /shops.json`), `PRINTIFY_WEBHOOK_SECRET` (shipment webhook). A brand can use other names via
+`fulfillers.printify.token_env` / `shop_id_env` in its config.
+
+Emails (all off until switched on, and switching on needs Jessie's yes): `RESEND_API_KEY`,
+`ORDER_EMAIL_FROM`, `ORDER_EMAIL_REPLY_TO` (optional), `ORDER_EMAILS_ENABLED`, `THREEPL_EMAIL`,
+`THREEPL_EMAILS_ENABLED`, `SHIP_LINK_SECRET`, `SIGNUP_NOTIFY_TO`, `SIGNUP_NOTIFY_ENABLED`.
+
+Optional: `CHECKOUT_PROMO_CONSENT` (`dropdown` | `stripe` | unset), `FP_PROXY_KEY` (shared with the
+mounting site), `STORE_PUBLIC_BASE`, `STORE_DIR` (dev/test).
+
+Set on the live project today (Nov 2026): STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, KV_*, REDIS_URL, ADMIN_TOKEN,
+UNSUBSCRIBE_SECRET, PRINTIFY_TOKEN, PRINTIFY_SHOP_ID, FP_PROXY_KEY, SIGNUP_NOTIFY_TO, CHECKOUT_PROMO_CONSENT.
+`STRIPE_FRUITY_PUPPY` is also set but no code reads it.
 
 ## Duplicatable program
 
@@ -76,7 +92,10 @@ The Stripe webhook calls fulfillOrder for the Printify lines of a paid order (se
 Webhook at /api/printify-webhook receives tracking and calls recordTracking.
 
 ## Merch factory
-See tools/merch-factory.js. Printify creates the product. The catalog image is the character photo.
+See tools/merch-factory.js (flags are documented at the top of the file; `npm run factory -- <flags>`).
+It resolves blueprint, provider and variant IDs live from the Printify catalog (`lib/printify-resolve.js`); run with `--dry-run` first.
+It writes `printify_product_id` / `printify_variant_id` on every variant. Printify creates the product. The catalog image is the character photo.
+Run `npm run check` before committing: it fails on Printify variants without Printify IDs.
 
 Default fulfiller is warehouse. Set product.fulfiller to "printify" for POD items.
 

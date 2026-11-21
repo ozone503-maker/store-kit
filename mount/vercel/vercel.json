@@ -1,0 +1,15 @@
+{
+  "rewrites": [
+    { "source": "/store", "destination": "https://fruity-puppy-store.vercel.app/?brand=BRAND" },
+    { "source": "/store/", "destination": "https://fruity-puppy-store.vercel.app/?brand=BRAND" },
+    { "source": "/store/product/:path*", "destination": "https://fruity-puppy-store.vercel.app/product/:path*?brand=BRAND" },
+    { "source": "/store/buy/:sku", "destination": "https://fruity-puppy-store.vercel.app/buy/:sku?brand=BRAND" },
+    { "source": "/store/cart", "destination": "https://fruity-puppy-store.vercel.app/cart?brand=BRAND" },
+    { "source": "/store/cart/", "destination": "https://fruity-puppy-store.vercel.app/cart/?brand=BRAND" },
+    { "source": "/store/confirmation", "destination": "https://fruity-puppy-store.vercel.app/confirmation?brand=BRAND" },
+    { "source": "/store/confirmation/", "destination": "https://fruity-puppy-store.vercel.app/confirmation/?brand=BRAND" },
+    { "source": "/store/api/:path*", "destination": "https://fruity-puppy-store.vercel.app/api/:path*?brand=BRAND" },
+    { "source": "/store/cart.js", "destination": "https://fruity-puppy-store.vercel.app/cart.js" },
+    { "source": "/store/store.css", "destination": "https://fruity-puppy-store.vercel.app/store.css" }
+  ]
+}

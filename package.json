@@ -10,6 +10,6 @@
     "dev": "node tools/dev.js",
     "check": "node tools/check-store.js",
     "test": "node --test test/*.test.js",
-    "import:shopify": "node tools/import-shopify.js"
+    "factory": "node tools/merch-factory.js"
   }
 }
