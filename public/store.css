@@ -148,3 +148,9 @@ a:focus-visible,button:focus-visible,input:focus-visible+span,select:focus-visib
 .fp-signup-consent{display:block;margin-top:8px;font-size:11px;opacity:.75}
 .fp-signup-msg{min-height:1.2em;margin:6px 0 0;font-size:13px}
 .fp-hp,.fp-sr{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* The Fridge Club (subscription) */
+a.buy,a.add{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.club-offer{margin-top:20px;padding:16px 18px;border:1px solid #e8d9d0;border-radius:14px;background:#fff}
+.club-offer p{margin:0 0 10px}
+.club-offer .muted{font-size:14px}

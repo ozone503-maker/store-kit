@@ -3,7 +3,7 @@ import { loadStore } from '../lib/store.js';
 import { rateLimit } from '../lib/rate.js';
 
 function esc(s) {
-  return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"' }[c]));
+  return String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
 export function GET(request) {
@@ -21,7 +21,8 @@ export function GET(request) {
 
   const variants = product.variants || [];
   const first = variants[0] || {};
-  const price = first.price_cents ? `$${(first.price_cents / 100).toFixed(2)}` : '$5 shipping';
+  const sub = product.subscription;
+  const price = first.price_cents ? `$${(first.price_cents / 100).toFixed(2)}${sub ? ` a ${sub.interval || 'month'}` : ''}` : '$5 shipping';
   const images = (product.images || []).map((src) => `<img src="${esc(/^https?:/.test(src) ? src : '../' + src)}" alt="${esc(product.title)}">`).join('');
   const buyable = variants.filter((v) => v.active !== false);
   const soldOut = !buyable.length;
@@ -64,7 +65,7 @@ export function GET(request) {
     <p class="desc">${esc(product.description || '')}</p>
     <p class="price">${price}</p>
     ${options ? `<label>Color <select id="sku">${options}</select></label>` : ''}
-    ${product.coming_soon ? '<p class="stock-out">Coming soon. Not for sale yet.</p><button class="add" type="button" disabled>Coming soon</button>' : product.draft ? '<p class="stock-out">Coming soon. Not for sale yet; colors and sizes are planned, not confirmed with the printer.</p><button class="add" type="button" disabled>Coming soon</button>' : soldOut ? '<p class="stock-out">Out of stock right now</p><button class="add" type="button" disabled>Out of stock</button>' : `<button class="add" data-add-sku="${esc(firstBuy.sku || '')}">Add to cart</button>`}
+    ${product.coming_soon ? '<p class="stock-out">Coming soon. Not for sale yet.</p><button class="add" type="button" disabled>Coming soon</button>' : product.draft ? '<p class="stock-out">Coming soon. Not for sale yet; colors and sizes are planned, not confirmed with the printer.</p><button class="add" type="button" disabled>Coming soon</button>' : soldOut ? '<p class="stock-out">Out of stock right now</p><button class="add" type="button" disabled>Out of stock</button>' : sub ? `<a class="add join" data-buy-sku="${esc(firstBuy.sku || '')}" href="../buy/${esc(encodeURIComponent(firstBuy.sku || ''))}">Join The Fridge Club</a><p class="muted">$${(firstBuy.price_cents / 100).toFixed(2)} charged when you join, then every ${esc(sub.interval || 'month')}. ${sub.cancel_email ? `To cancel, email <a href="mailto:${esc(sub.cancel_email)}?subject=Cancel%20my%20Fridge%20Club">${esc(sub.cancel_email)}</a>. No further charges after you cancel.` : ''}</p>` : `<button class="add" data-add-sku="${esc(firstBuy.sku || '')}">Add to cart</button>`}
     ${chartHtml}
   </div>
 </main>
@@ -79,6 +80,7 @@ document.getElementById('shop').href = BASE + '/' + brandQ;
 document.getElementById('cart-link').href = BASE + '/cart' + brandQ;
 document.getElementById('back').href = BASE + '/' + brandQ;
 document.querySelectorAll('.prod-link').forEach(a => a.href = BASE + '/product/' + a.dataset.id + brandQ);
+document.querySelectorAll('[data-buy-sku]').forEach(a => a.href = BASE + '/buy/' + encodeURIComponent(a.dataset.buySku) + brandQ);
 const sel = document.getElementById('sku');
 const btn = document.querySelector('.add');
 if (sel && btn) sel.addEventListener('change', () => btn.dataset.addSku = sel.value);

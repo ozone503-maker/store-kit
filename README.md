@@ -166,8 +166,9 @@ Generate random secrets locally (`openssl rand -hex 32`) and paste them straight
    - URL: `https://<brand site>/store/api/stripe-webhook` (Fruity Puppy:
      `https://www.fruitypuppy.com/store/api/stripe-webhook`). One endpoint serves every brand on the
      same Stripe account.
-   - Events (5): `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
-     `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`.
+   - Events (6): `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+     `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`,
+     `invoice.paid` (subscription renewals, The Fridge Club).
 3. Copy the endpoint's signing secret into `STRIPE_WEBHOOK_SECRET` (Production and Preview), redeploy.
 4. Make sure the endpoint is **enabled**. The handler is signature-verified and idempotent; on a
    failure it returns 5xx so Stripe retries.

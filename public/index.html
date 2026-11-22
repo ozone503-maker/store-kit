@@ -71,6 +71,10 @@ function jarCard(p) {
   const img = p.images[0] ? `<img src="${esc(imgSrc(p.images[0]))}" alt="${esc(p.id === 'free-sample' ? 'A real Fruity Puppy sample jar held between two fingers' : p.title)}" loading="lazy">` : '<div class="jar-blank" aria-hidden="true"></div>';
   if (!vs.length) return `<li class="jar out"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="stock-out">${p.coming_soon ? 'Coming soon' : 'Out of stock'}</span></li>`;
   const v = vs[0];
+  if (p.subscription) {
+    // Subscriptions check out on their own (Stripe subscription mode), straight from the join link.
+    return `<li class="jar club"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="jar-price">${money(v.price_cents)}/mo</span><a class="buy" href="${BASE}/buy/${encodeURIComponent(v.sku)}${brandQ}">Join the club</a></li>`;
+  }
   const price = v.price_cents ? money(v.price_cents) : 'Free, $5 shipping';
   return `<li class="jar"><a href="${href(p)}">${img}<span class="jar-name">${esc(p.title)}</span></a><span class="jar-price">${price}</span><button class="buy" type="button" data-add-sku="${esc(v.sku)}">Add to cart</button></li>`;
 }

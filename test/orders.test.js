@@ -203,7 +203,7 @@ test('signature helper', () => {
 });
 test('catalog unchanged shape', async () => {
   const d = await (await catalog(new Request('https://x/api/catalog'))).json();
-  assert.equal(d.products.filter(p => p.collection !== 'Logo').length, 13);
+  assert.equal(d.products.filter(p => p.collection !== 'Logo').length, 14);
   assert.ok(d.products.every(p => p.variants.every(v => 'sku' in v && 'price_cents' in v)));
 });
 

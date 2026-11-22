@@ -4,6 +4,9 @@ import { rateLimit } from '../lib/rate.js';
 
 const DEFAULT_MAX_QTY = 20;
 const MAX_LINES = 50;
+export const MIXED_CART_ERROR = 'The Fridge Club checks out on its own. Check out your other items first, then join the club.';
+const intervalKey = p => `${p.subscription.interval || 'month'}:${p.subscription.interval_count || 1}`;
+export const isSubscriptionCart = lines => lines.some(l => l.product.subscription);
 
 // Redirects are built on the server from the brand's allowed_origins only.
 // The client may hint which allowed origin and whether the store is mounted at /store.
@@ -45,7 +48,14 @@ export function validateItems(body, catalog, maxQty) {
     if (total > maxQty) return { error: `Maximum ${maxQty} per item` };
     merged.set(sku, { ...found, quantity: total });
   }
-  return { lines: [...merged.values()] };
+  const lines = [...merged.values()];
+  // A subscription (The Fridge Club) is its own Stripe Checkout in subscription mode; one-time items
+  // and different billing intervals cannot share it.
+  const subs = lines.filter(l => l.product.subscription);
+  if (subs.length && (subs.length !== lines.length || new Set(subs.map(l => intervalKey(l.product))).size > 1)) {
+    return { error: MIXED_CART_ERROR };
+  }
+  return { lines };
 }
 
 export async function POST(request, { fetchImpl = fetch } = {}) {
@@ -76,7 +86,9 @@ export async function POST(request, { fetchImpl = fetch } = {}) {
 export async function createStripeSession({ lines, config, brand, hint, stripeKey, fetchImpl = fetch }) {
   const urls = redirectUrls(config, brand, hint);
   const params = new URLSearchParams();
-  params.set('mode', 'payment');
+  const subscription = isSubscriptionCart(lines);
+  // Subscriptions charge the first period at signup; renewals arrive as invoice.paid (lib/orders.js).
+  params.set('mode', subscription ? 'subscription' : 'payment');
   params.set('success_url', urls.success_url);
   params.set('cancel_url', urls.cancel_url);
   params.set('automatic_tax[enabled]', 'false');
@@ -114,10 +126,20 @@ export async function createStripeSession({ lines, config, brand, hint, stripeKe
       params.set(`${prefix}[price_data][product_data][metadata][sku]`, variant.sku);
       params.set(`${prefix}[price_data][unit_amount]`, String(variant.price_cents));
       if (product.checkout_note) params.set(`${prefix}[price_data][product_data][description]`, product.checkout_note);
+      if (product.subscription) {
+        params.set(`${prefix}[price_data][recurring][interval]`, product.subscription.interval || 'month');
+        params.set(`${prefix}[price_data][recurring][interval_count]`, String(product.subscription.interval_count || 1));
+      }
     }
     params.set(`${prefix}[quantity]`, String(quantity));
     if (product.fixed_shipping_cents) shippingCents = Math.max(shippingCents, product.fixed_shipping_cents);
   });
+
+  if (subscription) {
+    // Copied onto the subscription and every renewal invoice so renewals can be booked as orders.
+    params.set('subscription_data[metadata][brand]', brand || '');
+    params.set('subscription_data[metadata][skus]', lines.map(l => `${l.variant.sku}:${l.quantity}`).join(','));
+  }
 
   if (shippingCents) {
     params.set('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');

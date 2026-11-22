@@ -47,7 +47,7 @@ function suggestions() {
   const out = [];
   for (const id of want) {
     const p = catalog.products.find(x => x.id === id);
-    if (!p) continue;
+    if (!p || p.subscription) continue;
     const v = p.variants[0];
     if (!v || v.available === false || inCart.has(v.sku)) continue;
     out.push(p);
@@ -55,7 +55,7 @@ function suggestions() {
   if (!out.length) {
     for (const p of catalog.products) {
       const v = p.variants[0];
-      if (v && v.available !== false && !inCart.has(v.sku)) out.push(p);
+      if (v && !p.subscription && v.available !== false && !inCart.has(v.sku)) out.push(p);
       if (out.length >= 3) break;
     }
   }
@@ -109,7 +109,7 @@ function render() {
     const price = hit ? hit.variant.price_cents : 0;
     if (hit && hit.variant.available !== false) sub += price * (item.quantity || 1);
     return `<div class="cart-line">
-      <div><b>${title}</b><div>${gone ? '<span class="stock-out">Out of stock, please remove</span>' : money(price)}</div></div>
+      <div><b>${title}</b><div>${gone ? '<span class="stock-out">Out of stock, please remove</span>' : money(price) + (hit?.product.subscription ? ' a month' : '')}</div></div>
       <div class="qty">
         <button type="button" data-qty="${i}" data-d="-1">−</button>
         <span>${item.quantity || 1}</span>
@@ -135,10 +135,20 @@ function render() {
   if (pageSug) pageSug.innerHTML = block;
 }
 
+const isSub = sku => !!findVariant(sku)?.product.subscription;
 function addToCart(sku, quantity = 1) {
   const hit = findVariant(sku);
   if (hit && hit.variant.available === false) return;
-  const cart = getCart();
+  let cart = getCart();
+  // The Fridge Club is a monthly subscription and checks out on its own, never mixed with one-time items.
+  const mixed = cart.some(i => isSub(i.sku) !== isSub(sku));
+  if (mixed) {
+    const msg = isSub(sku)
+      ? 'The Fridge Club checks out on its own. Replace your cart with The Fridge Club? (Check out your other items first if you want them too.)'
+      : 'Your cart has The Fridge Club, which checks out on its own. Replace it with this item?';
+    if (!confirm(msg)) return;
+    cart = [];
+  }
   const existing = cart.find(i => i.sku === sku);
   if (existing) existing.quantity += quantity;
   else cart.push({ sku, quantity });

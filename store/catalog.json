@@ -32,6 +32,43 @@
       "threepl_note": "Ship with Dec 1 batch"
     },
     {
+      "id": "fridge-club",
+      "title": "The Fridge Club",
+      "brand": "Fruity Puppy",
+      "type": "Skincare",
+      "collection": "Cream",
+      "description": "A fresh jar of Fruity Puppy Original every month, $10 less than a single jar. First jar ships with the Dec 1 batch. Cancel anytime.",
+      "images": [
+        "img/fruity-puppy-original.webp"
+      ],
+      "tags": [
+        "skincare",
+        "cream",
+        "subscription"
+      ],
+      "pairs": [
+        "fruity-puppy-original"
+      ],
+      "fulfiller": "warehouse",
+      "subscription": {
+        "interval": "month",
+        "interval_count": 1,
+        "ships_sku": "FP-2OZ",
+        "cancel_email": "orders@fruitypuppy.com"
+      },
+      "variants": [
+        {
+          "sku": "FP-CLUB-MONTHLY",
+          "title": "Monthly, one 2 oz jar",
+          "price_cents": 4999,
+          "active": true
+        }
+      ],
+      "checkout_note": "Monthly subscription. One 2 oz jar of Fruity Puppy Original each month. First jar ships with the Dec 1 batch. Cancel anytime: email orders@fruitypuppy.com",
+      "threepl_note": "Fridge Club signup: ship 1 x FP-2OZ (Fruity Puppy Original 2 oz) with the Dec 1 batch",
+      "renewal_threepl_note": "Fridge Club monthly renewal: ship 1 x FP-2OZ (Fruity Puppy Original 2 oz)"
+    },
+    {
       "id": "fpx",
       "title": "FPX",
       "brand": "Fruity Puppy",
