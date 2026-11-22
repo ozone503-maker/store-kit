@@ -87,6 +87,7 @@ s.src = BASE + '/cart.js';
 if (!new URLSearchParams(location.search).get('brand') && !/brobots|kudoken/.test(location.hostname)) { const g = document.createElement('script'); g.src = BASE + '/signup.js'; g.defer = true; document.head.appendChild(g); }
 document.body.appendChild(s);
 </script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body></html>`;
 
   return new Response(html, { headers: { 'Content-Type': 'text/html', 'Cache-Control': 'public, max-age=60' } });
